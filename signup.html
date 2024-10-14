@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup | onestop.ai | simple chat app</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script>try{TypeKit.load({async:true});}catch(e){}</script>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <main>
+        <div class="container">
+            <div class="row justify-content-center align-items-center" style="height:100vh;">
+                <div class="card" style="width:700px">
+                    <div class="card-header">signUp</div>
+                    <div class="card-body">
+                        <form action="#">
+                            <div class="form-group row mt-2">
+                                <label for="name" class="col-md-4 text-md-right">Username</label>
+                                <div class="col-md-8">
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" >
+                                    <span class="text-danger" id="nameErr"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row mt-2">
+                                <label for="email_address" class="col-md-4">Email</label>
+                                <div class="col-md-8">
+                                    <input type="email" id="email_address" name="email" class="form-control"  placeholder="Enter your email" >
+                                    <span class="text-danger" id="emailErr"></span>
+                                </div>
+                               
+                            </div>
+
+                            <div class="form-group row mt-2">
+                                <label for="password" class="col-md-4">Password</label>
+                                <div class="col-md-8">
+                                    <input type="password" id="password" name="password" placeholder="Enter your password" class="form-control">
+                                    <span class="text-danger" id="passwordErr"></span>
+                                </div>
+                               
+                            </div>
+
+                            <div class="form-group row mt-2">
+                                <label for="confirm_password" class="col-md-4">Confirm Password</label>
+                                <div class="col-md-8">
+                                    <input type="password" id="confirm_password" name="confirm_password" placeholder="confirm your password" class="form-control">
+                                    <span class="text-danger" id="confirmPasswordErr"></span>
+                                </div>
+                               
+                            </div>
+                            <div class="form-group row mt-2">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-8">
+                                    <button type="button" id="saveUser" class="btn btn-primary">Signup</button>
+                                    <p class="mt-2 mb-2">Already have an account <a href="index.html" style="text-decoration:none">click here to login</a></p>
+                                </div>
+                                
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+    </main>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script> 
+    <script src="validation.js"></script>
+   <script type="module">
+  
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth,createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getDatabase,ref,set,push,onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        const firebaseConfig = {
+          apiKey: "AIzaSyAKbGnY1tAIwZ_XO1cBN7Nlyv-131K4azk",
+          authDomain: "simplechatapp-b6563.firebaseapp.com",
+          databaseURL: "https://simplechatapp-b6563-default-rtdb.firebaseio.com",
+          projectId: "simplechatapp-b6563",
+          storageBucket: "simplechatapp-b6563.appspot.com",
+          messagingSenderId: "353510201010",
+          appId: "1:353510201010:web:bde27d13c8890df55c5bab",
+          measurementId: "G-6QKB9KMBZZ"
+        };
+      
+        const app = initializeApp(firebaseConfig);
+        
+        
+        
+        const db = getDatabase();
+        function saveUserToFirebase(){
+            if(validateSignUpInputCredentials()){
+                const auth = getAuth(app);
+                const email = document.getElementById("email_address").value;
+                const password = document.getElementById("password").value;
+                createUserWithEmailAndPassword(auth,email,password)
+                .then((userCredentials)=>{
+                    const user= userCredentials.user;
+                    push(ref(db,'/registered_users'),{
+                        userid:user.uid,
+                        email:user.email
+                    }).then(()=>{
+                        alert('successfully Registered');
+                        location.href="index.html";
+                    }).catch((error)=>{
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                    })
+                })
+            }
+        }
+        $("#saveUser").on('click',function(){
+            saveUserToFirebase();
+        })
+      </script>
+</body>
+</html>
